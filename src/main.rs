@@ -10,23 +10,29 @@ struct Info {
     id: String,
 }
 
-async fn get_videos(info: web::Path<Info>) -> impl Responder {
+lazy_static::lazy_static! {
+    static ref API_KEY: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
+}
+
+async fn get_videos(
+    info: web::Path<Info>,
+    query: web::Query<std::collections::HashMap<String, String>>,
+) -> impl Responder {
     let start = Instant::now();
     let id = info.id.replace("UC", "UU");
 
-    let api_key = match env::var("YOUTUBE_API_KEY") {
-        Ok(key) => key,
-        Err(_) => {
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({ "error": "YOUTUBE_API_KEY is not set" }));
-        }
-    };
+    let max_results = query
+        .get("maxResults")
+        .and_then(|v| v.parse::<u32>().ok())
+        .map(|v| v.clamp(1, 50))
+        .unwrap_or(5);
 
     println!("Fetching videos for playlist {}", id);
+    println!("Max results: {}", max_results);
 
     let url = format!(
-        "https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={}&key={}&maxResults=5",
-        id, api_key
+        "https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={}&key={}&maxResults={}",
+        id, *API_KEY.lock().unwrap(), max_results
     );
 
     let response = match reqwest::get(&url).await {
@@ -85,12 +91,14 @@ async fn get_videos(info: web::Path<Info>) -> impl Responder {
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
 
+    *API_KEY.lock().unwrap() = env::var("YOUTUBE_API_KEY").expect("YOUTUBE_API_KEY is not set");
+
     let port = env::var("PORT")
         .unwrap_or_else(|_| "8080".to_string())
         .parse()
         .expect("Invalid port number");
 
-    println!("Server is running on http://127.0.0.1:{}", port);
+    println!("Server is running on http://localhost:{}", port);
 
     HttpServer::new(|| {
         App::new()
@@ -103,7 +111,7 @@ async fn main() -> std::io::Result<()> {
             .route("/get/{id}", web::get().to(get_videos))
             .route("/get/{id}/", web::get().to(get_videos))
     })
-    .bind(("127.0.0.1", port))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
