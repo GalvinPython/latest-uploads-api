@@ -22,7 +22,7 @@ async fn get_videos(
     let id = info.id.replace("UC", "UU");
 
     let max_results = query
-        .get("maxResults")
+        .get("maxresults")
         .and_then(|v| v.parse::<u32>().ok())
         .map(|v| v.clamp(1, 50))
         .unwrap_or(5);
