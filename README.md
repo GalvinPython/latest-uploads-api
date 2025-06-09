@@ -74,7 +74,7 @@ Technical overview:
 - Required: **False**
 - Type: `string`
 - Default: `all`
-- Accepted values: `shorts`, `live`, `video`, `all`
+- Accepted values: `shorts`, `live`, `videos`, `all`
   - Any other values will default to `all`
 
 Example response: `?type=shorts`
