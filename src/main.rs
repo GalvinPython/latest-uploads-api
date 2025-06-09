@@ -20,11 +20,11 @@ async fn get_videos(
 ) -> impl Responder {
     let start = Instant::now();
     let id = match query.get("type").map(String::as_str) {
-        Some("shorts") => info.id.replace("UC", "UUSH"),
-        Some("live") => info.id.replace("UC", "UULV"),
-        Some("videos") => info.id.replace("UC", "UULF"),
-        Some("all") => info.id.replace("UC", "UU"),
-        _ => info.id.replace("UC", "UU"),
+        Some("shorts") => info.id.replacen("UC", "UUSH", 1),
+        Some("live") => info.id.replacen("UC", "UULV", 1),
+        Some("videos") => info.id.replacen("UC", "UULF", 1),
+        Some("all") => info.id.replacen("UC", "UU", 1),
+        _ => info.id.replacen("UC", "UU", 1),
     };
 
     let max_results = query
