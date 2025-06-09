@@ -33,12 +33,15 @@ async fn get_videos(
         .map(|v| v.clamp(1, 50))
         .unwrap_or(5);
 
-    println!("Fetching videos for playlist {}", id);
-    println!("Max results: {}", max_results);
-
+    
     let url = format!(
         "https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={}&key={}&maxResults={}",
         id, *API_KEY.lock().unwrap(), max_results
+    );
+    
+    println!(
+        "Fetching videos for playlist {} | Max results: {} | URL: {}",
+        id, max_results, url
     );
 
     let response = match reqwest::get(&url).await {
@@ -55,11 +58,15 @@ async fn get_videos(
                                         .map(|s| s.to_string());
                                     let title =
                                         item["snippet"]["title"].as_str().map(|s| s.to_string());
+                                    let published_at = item["snippet"]["publishedAt"]
+                                        .as_str()
+                                        .map(|s| s.to_string());
 
                                     match (video_id, title) {
                                         (Some(video_id), Some(title)) => Some(serde_json::json!({
                                             "videoId": video_id,
-                                            "title": title
+                                            "title": title,
+                                            "publishedAt": published_at.unwrap_or_default(),
                                         })),
                                         _ => None,
                                     }
