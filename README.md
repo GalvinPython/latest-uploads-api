@@ -42,6 +42,7 @@ The number of videos returned in the response
 
 Technical overview:
 
+- Required: **False**
 - Type: `int`
 - Default: `5`
 - Minimum: `1`
@@ -60,6 +61,60 @@ Example response: `?maxresults=2`
   {
     "title": "Last One To Fall Wins",
     "videoId": "954wJ3uHVAk"
+  }
+]
+```
+
+## ?type
+
+The type of content you want to receive
+
+Technical overview:
+
+- Required: **False**
+- Type: `string`
+- Default: `all`
+- Accepted values: `shorts`, `live`, `videos`, `all`
+  - Any other values will default to `all`
+
+Example response: `?type=shorts`
+
+```json
+[
+  {
+    "title": "Gordon Ramsay Decides Feastables vs Hershey’s",
+    "videoId": "g2nwnC1Xn0E"
+  },
+  {
+    "title": "Can I Teach a Penguin To Subscribe?",
+    "videoId": "KCRLP-zBacU"
+  },
+  {
+    "title": "Extreme Helmet Game",
+    "videoId": "c2ukL_zjFCk"
+  },
+  {
+    "title": "Grab The Rolex, Keep It!",
+    "videoId": "7qY-qalCI2Y"
+  },
+  {
+    "title": "Slippery vs Sticky Stairs",
+    "videoId": "N0pwLtonPdg"
+  }
+]
+```
+
+As a reminder, queries can be stacked: `?type=shorts&maxresults=2`
+
+```json
+[
+  {
+    "title": "Gordon Ramsay Decides Feastables vs Hershey’s",
+    "videoId": "g2nwnC1Xn0E"
+  },
+  {
+    "title": "Can I Teach a Penguin To Subscribe?",
+    "videoId": "KCRLP-zBacU"
   }
 ]
 ```
