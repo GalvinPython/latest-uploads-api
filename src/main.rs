@@ -19,7 +19,13 @@ async fn get_videos(
     query: web::Query<std::collections::HashMap<String, String>>,
 ) -> impl Responder {
     let start = Instant::now();
-    let id = info.id.replace("UC", "UU");
+    let id = match query.get("type").map(String::as_str) {
+        Some("shorts") => info.id.replace("UC", "UUSH"),
+        Some("live") => info.id.replace("UC", "UULV"),
+        Some("videos") => info.id.replace("UC", "UULF"),
+        Some("all") => info.id.replace("UC", "UU"),
+        _ => info.id.replace("UC", "UU"),
+    };
 
     let max_results = query
         .get("maxresults")
