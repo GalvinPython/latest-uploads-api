@@ -33,12 +33,11 @@ async fn get_videos(
         .map(|v| v.clamp(1, 50))
         .unwrap_or(5);
 
-    
     let url = format!(
         "https://youtube.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId={}&key={}&maxResults={}",
         id, *API_KEY.lock().unwrap(), max_results
     );
-    
+
     println!(
         "Fetching videos for playlist {} | Max results: {} | URL: {}",
         id, max_results, url
@@ -100,6 +99,12 @@ async fn get_videos(
     response
 }
 
+async fn serve_index() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(include_str!("index.html"))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
@@ -121,6 +126,18 @@ async fn main() -> std::io::Result<()> {
                     .allow_any_method()
                     .allow_any_header(),
             )
+            .route("/", web::get().to(serve_index))
+            .route("/index.html", web::get().to(serve_index))
+            .route("/docs", web::get().to(|| async {
+                HttpResponse::Found()
+                    .insert_header(("Location", "https://github.com/GalvinPython/latest-uploads-api#latest-youtube-uploads"))
+                    .finish()
+            }))
+            .route("/docs/", web::get().to(|| async {
+                HttpResponse::Found()
+                    .insert_header(("Location", "https://github.com/GalvinPython/latest-uploads-api#latest-youtube-uploads"))
+                    .finish()
+            }))
             .route("/get/{id}", web::get().to(get_videos))
             .route("/get/{id}/", web::get().to(get_videos))
     })
