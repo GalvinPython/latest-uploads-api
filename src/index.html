@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latest YouTube Videos API</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body
+    class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-3xl px-4">
+        <h1 class="text-5xl font-extrabold text-blue-600 dark:text-blue-400 mb-4 text-center">
+            Latest YouTube Videos API
+        </h1>
+        <p class="text-lg text-gray-700 dark:text-gray-300 mb-6 text-center">
+            Fetch and display the latest videos from your favourite channels.
+        </p>
+        <form id="fetch-videos-form" class="space-y-4">
+            <div>
+                <label for="channel-id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    YouTube Channel ID
+                </label>
+                <input type="text" id="channel-id" name="channel-id" placeholder="Enter Channel ID"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-500 dark:text-gray-100">
+            </div>
+            <div>
+                <label for="show-options" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Show Optional Fields
+                </label>
+                <input type="checkbox" id="show-options" name="show-options"
+                    class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+            </div>
+            <div id="optional-fields" class="space-y-4 hidden">
+                <div>
+                    <label for="video-count" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Video Count (1-50)
+                    </label>
+                    <input type="number" id="video-count" name="video-count" min="1" max="50"
+                        placeholder="Enter video count"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-500 dark:text-gray-100">
+                </div>
+                <div>
+                    <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                    <select id="type" name="type"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+                        <option value="all">All</option>
+                        <option value="video">Video</option>
+                        <option value="shorts">Shorts</option>
+                        <option value="streams">Streams</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600">
+                Fetch Videos
+            </button>
+        </form>
+
+        <div id="video-list" class="mt-6 grid gap-4 sm:grid-cols-1 md:grid-cols-2"></div>
+    </div>
+
+    <script>
+        const showOptionsCheckbox = document.getElementById('show-options');
+        const optionalFields = document.getElementById('optional-fields');
+        const videoList = document.getElementById('video-list');
+
+        showOptionsCheckbox.addEventListener('change', () => {
+            optionalFields.classList.toggle('hidden', !showOptionsCheckbox.checked);
+        });
+
+        const form = document.getElementById('fetch-videos-form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const channelId = document.getElementById('channel-id').value;
+            const videoCount = document.getElementById('video-count').value || 5;
+            const type = document.getElementById('type').value || 'all';
+
+            if (!channelId) {
+                alert('Please enter a YouTube Channel ID.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/get/${channelId}?type=${type}&maxresults=${videoCount}`);
+                if (!response.ok) throw new Error('Failed to fetch videos');
+
+                const data = await response.json();
+                renderVideos(data);
+            } catch (error) {
+                console.error('Error fetching videos:', error);
+                alert('An error occurred while fetching videos.');
+            }
+        });
+
+        function renderVideos(videos) {
+            videoList.innerHTML = '';
+            videos.forEach(video => {
+                const videoCard = document.createElement('a');
+                videoCard.href = `https://www.youtube.com/watch?v=${video.videoId}`;
+                videoCard.target = '_blank';
+                videoCard.className =
+                    "block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden";
+
+                videoCard.innerHTML = `
+                    <img src="https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg" alt="${video.title}" class="w-full h-40 object-cover">
+                    <div class="p-4">
+                        <h2 class="text-lg font-semibold text-blue-600 dark:text-blue-400 hover:underline line-clamp-2">${video.title}</h2>
+                        <p class="text-xs text-gray-500 mt-1">${new Date(video.publishedAt).toLocaleString()}</p>
+                    </div>
+                `;
+                videoList.appendChild(videoCard);
+            });
+        }
+    </script>
+</body>
+
+</html>
