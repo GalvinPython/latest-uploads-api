@@ -99,10 +99,17 @@ async fn get_videos(
     response
 }
 
+// I know there's an easier way to serve static files but this is the quickest and laziest way for me
 async fn serve_index() -> impl Responder {
     HttpResponse::Ok()
         .content_type("text/html")
-        .body(include_str!("index.html"))
+        .body(include_str!("web/index.html"))
+}
+
+async fn serve_site_js() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type("application/javascript")
+        .body(include_str!("web/site.js"))
 }
 
 #[actix_web::main]
@@ -128,6 +135,7 @@ async fn main() -> std::io::Result<()> {
             )
             .route("/", web::get().to(serve_index))
             .route("/index.html", web::get().to(serve_index))
+            .route("/site.js", web::get().to(serve_site_js))
             .route("/docs", web::get().to(|| async {
                 HttpResponse::Found()
                     .insert_header(("Location", "https://github.com/GalvinPython/latest-uploads-api#latest-youtube-uploads"))
