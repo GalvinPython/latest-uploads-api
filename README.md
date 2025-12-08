@@ -6,12 +6,14 @@ Get the latest five uploads for any YouTube channel!
 
 ## Using a browser
 
-You can go to [the site](https://latestvid.stats100.xyz)
+You can go to [the site](https://latestvid.imgalvin.me)
+
+API docs exist [here](https://latestvid.imgalvin.me/swagger-ui/), but the docs on this README are more straightforward
 
 ## In a program using a Fetch API
 
-It's very simple, just make a request to `https://latestvid.stats100.xyz/get/<CHANNEL_ID_HERE>`  
-For example, to get the latest uploads for [MrBeast](https://youtube.com/@mrbeast), just have to make a simple request to `https://latestvid.stats100.xyz/get/UCX6OQ3DkcsbYNE6H8uQQuVA` and get an example response like this:
+It's very simple, just make a request to `https://latestvid.imgalvin.me/get/<CHANNEL_ID_HERE>`  
+For example, to get the latest uploads for [MrBeast](https://youtube.com/@mrbeast), just have to make a simple request to `https://latestvid.imgalvin.me/get/UCX6OQ3DkcsbYNE6H8uQQuVA` and get an example response like this:
 
 ```json
 [
@@ -129,4 +131,4 @@ As a reminder, queries can be stacked: `?type=shorts&maxresults=2`
 
 Docker is not required. I just use it because Nix is very unhappy on my server.
 
-If you do use to use Docker, the application runs on port 8080 by default
+If you do wish to use Docker, the application runs on port 8080 by default

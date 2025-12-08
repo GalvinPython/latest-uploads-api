@@ -1,19 +1,44 @@
 use actix_cors::Cors;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use reqwest;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::time::Instant;
 
-#[derive(Deserialize)]
+use utoipa::OpenApi;
+use utoipa::ToSchema;
+use utoipa_swagger_ui::SwaggerUi;
+
+#[derive(Deserialize, ToSchema)]
 struct Info {
     id: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct APIResponseStruct {
+    pub video_id: String,
+    pub title: String,
 }
 
 lazy_static::lazy_static! {
     static ref API_KEY: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
 }
 
+#[utoipa::path(
+    get,
+    path = "/get/{id}",
+    params(
+        ("id" = String, Path, description = "YouTube channel or playlist ID"),
+        ("type" = Option<String>, Query, description = "Type filter (shorts, live, videos, all)"),
+        ("maxresults" = Option<u32>, Query, description = "Maximum results (1-50)")
+    ),
+    responses(
+        (status = 200, description = "List of videos", body = [APIResponseStruct]),
+        (status = 404, description = "No videos found"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 async fn get_videos(
     info: web::Path<Info>,
     query: web::Query<std::collections::HashMap<String, String>>,
@@ -112,6 +137,10 @@ async fn serve_site_js() -> impl Responder {
         .body(include_str!("web/site.js"))
 }
 
+#[derive(OpenApi)]
+#[openapi(paths(get_videos), components(schemas(Info)))]
+struct ApiDoc;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
@@ -125,13 +154,17 @@ async fn main() -> std::io::Result<()> {
 
     println!("Server is running on http://localhost:{}", port);
 
-    HttpServer::new(|| {
+    HttpServer::new(move || {
         App::new()
             .wrap(
                 Cors::default()
                     .allow_any_origin()
                     .allow_any_method()
                     .allow_any_header(),
+            )
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}")
+                    .url("/api-docs/openapi.json", ApiDoc::openapi()),
             )
             .route("/", web::get().to(serve_index))
             .route("/index.html", web::get().to(serve_index))
