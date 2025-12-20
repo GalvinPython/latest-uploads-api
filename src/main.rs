@@ -30,7 +30,13 @@ lazy_static::lazy_static! {
     path = "/get/{id}",
     params(
         ("id" = String, Path, description = "YouTube channel or playlist ID"),
-        ("type" = Option<String>, Query, description = "Type filter (shorts/short, live/lives/stream/streams, videos/video/long/longs, all)"),
+        ("type" = Option<String>, Query, description = r#"Type filter.
+
+Aliases:
+- shorts, short
+- live, lives, stream, streams
+- videos, video, long, longs
+- all"#),
         ("maxresults" = Option<u32>, Query, description = "Maximum results (1-50)")
     ),
     responses(
