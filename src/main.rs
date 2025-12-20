@@ -30,7 +30,13 @@ lazy_static::lazy_static! {
     path = "/get/{id}",
     params(
         ("id" = String, Path, description = "YouTube channel or playlist ID"),
-        ("type" = Option<String>, Query, description = "Type filter (shorts, live, videos, all)"),
+        ("type" = Option<String>, Query, description = r#"Type filter.
+
+Aliases:
+- shorts, short
+- live, lives, stream, streams
+- videos, video, long, longs
+- all"#),
         ("maxresults" = Option<u32>, Query, description = "Maximum results (1-50)")
     ),
     responses(
@@ -45,9 +51,13 @@ async fn get_videos(
 ) -> impl Responder {
     let start = Instant::now();
     let id = match query.get("type").map(String::as_str) {
-        Some("shorts") => info.id.replacen("UC", "UUSH", 1),
-        Some("live") => info.id.replacen("UC", "UULV", 1),
-        Some("videos") => info.id.replacen("UC", "UULF", 1),
+        Some("shorts") | Some("short") => info.id.replacen("UC", "UUSH", 1),
+        Some("live") | Some("lives") | Some("stream") | Some("streams") => {
+            info.id.replacen("UC", "UULV", 1)
+        }
+        Some("videos") | Some("video") | Some("long") | Some("longs") => {
+            info.id.replacen("UC", "UULF", 1)
+        }
         Some("all") => info.id.replacen("UC", "UU", 1),
         _ => info.id.replacen("UC", "UU", 1),
     };

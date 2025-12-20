@@ -83,6 +83,7 @@ Technical overview:
 - Type: `string`
 - Default: `all`
 - Accepted values: `shorts`, `live`, `videos`, `all`
+  - Aliases: `short` for `shorts`, `lives`/`stream`/`streams` for `live`, `video`/`long`/`longs` for `videos`
   - Any other values will default to `all`
 
 Example response: `?type=shorts`
